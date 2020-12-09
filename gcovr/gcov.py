@@ -203,6 +203,20 @@ def guess_source_file_name_heuristics(
     if os.path.exists(fname):
         return fname
 
+    # pre-3. Try using the current working directory as the source directory
+    head, tail = os.path.split(gcovname)
+    gcovname_tail = tail
+    while head and not os.path.exists(os.path.join(currdir, gcovname_tail)):
+        print(f"== {head} {tail} {gcovname_tail}")
+        head, tail = os.path.split(head)
+        gcovname_tail = os.path.join(tail, gcovname_tail)
+
+    fname = os.path.join(currdir, gcovname_tail)
+
+    if os.path.exists(fname):
+        print(f"#pre-3. resolved as {fname}")
+        return fname
+
     # Get path of gcda file
     source_fname_dir = os.path.dirname(source_fname)
 
@@ -213,6 +227,7 @@ def guess_source_file_name_heuristics(
 
     # 4. Try using the path to the gcda file as the source directory, removing the path part from the gcov file
     fname = os.path.join(source_fname_dir, os.path.basename(gcovname))
+    print(f">>> {gcovname} {currdir} {root_dir} {starting_dir} {source_fname} {source_fname_dir}")
     return fname
 
 
